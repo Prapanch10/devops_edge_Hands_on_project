@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  sensor:
+    build: .
+    container_name: sensor_service
+    ports:
+      - "8000:8000"
+    mem_limit: 100m
+    restart: always
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: victoria_metrics
+    command:
+      - "--storageDataPath=/storage"
+      - "--retentionPeriod=1d"
+      - "--promscrape.config=/etc/prometheus/prometheus.yml"
+    ports:
+      - "8428:8428"
+    volumes:
+      - vmdata:/storage
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    mem_limit: 150m
+    restart: always
+
+volumes:
+  vmdata:
+    driver: local

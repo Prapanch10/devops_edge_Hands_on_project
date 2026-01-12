@@ -1,1 +1,215 @@
-# devops_edge_assignment
+# DevOps Intern Assignment — Edge Observability Optimization
+
+## 1. Context
+
+This assignment simulates working on an edge computing robot module with limited resources:
+
+- 2-core CPU (~2 GHz)
+- ~500 MB usable RAM
+- Docker available
+
+The provided Python sensor service was intentionally inefficient. During testing, it showed:
+
+- CPU spikes
+- Increasing memory usage
+- Unstable scrape behavior
+- Inconsistent response times
+
+My task was to deploy this service, debug and optimize it, and build an observability setup that works reliably under strict memory limits.
+
+---
+
+## 2. Objective
+
+The goal was to build a working observability stack that includes:
+
+- The provided Python sensor service
+- A Prometheus-compatible metrics collector
+- A visualization layer
+
+**Hard constraint:**  
+All components combined must stay below **300 MB RAM** and continue working reliably.
+
+---
+
+## 3. Work Done
+
+### 3.1 Deploying the Sensor Service
+
+I containerized the provided Python service using Docker and ran it as an isolated container.
+
+While running the service and scraping `/metrics`, I observed:
+
+- Frequent metric scrapes
+- CPU spikes during request handling
+- Growing request counters even without manual traffic
+
+These issues were caused by:
+
+- Inefficient request handling logic
+- Uncontrolled metric updates
+- Blocking operations during scraping
+
+I simplified the request flow and ensured that:
+
+- Metric updates are lightweight
+- Processing latency is consistent
+- Scrapes do not trigger heavy CPU work
+
+After optimization, the service became stable under continuous scraping.
+
+---
+
+### 3.2 Metrics System Choice
+
+Instead of running full Prometheus, I chose **VictoriaMetrics (single-node)**.
+
+Reasons for choosing VictoriaMetrics:
+
+- Prometheus-compatible metrics
+- Much lower memory usage
+- Built-in scraping support
+- No separate server + agent needed
+- Includes a lightweight UI
+
+This choice reduced:
+
+- Number of containers
+- Memory overhead
+- Operational complexity
+
+It fits edge environments better than a full Prometheus stack.
+
+---
+
+### 3.3 Visualization Layer
+
+I intentionally did **not** use Grafana.
+
+Grafana adds:
+
+- An extra container
+- High baseline memory usage
+- Unnecessary overhead for a small edge device
+
+Instead, I used **VictoriaMetrics VMUI**, which:
+
+- Is built-in
+- Requires no extra services
+- Supports PromQL-compatible queries
+- Is sufficient for debugging and analysis
+
+### UI Access
+
+VictoriaMetrics built-in UI can be accessed at:
+
+http://localhost:8428/vmui
+
+This UI was used to:
+- Query metrics using PromQL-compatible syntax
+- Visualize request counters and latency trends
+- Validate system stability under continuous scraping
+
+---
+
+## 4. Performance Budget Report
+
+### Memory Usage (Observed)
+
+| Component           | Memory Usage |
+|--------------------|--------------|
+| Sensor Service     | ~25–30 MB    |
+| VictoriaMetrics    | ~90–100 MB   |
+| **Total**          | **~120–130 MB** |
+
+This stays comfortably below the **300 MB RAM constraint**.
+
+---
+
+### Bottlenecks Identified
+
+- CPU spikes caused by inefficient request logic
+- Metrics scraping triggering heavy operations
+- No initial control over scrape frequency
+
+---
+
+### Fixes Applied
+
+- Reduced work done during each request
+- Stabilized metric updates
+- Tuned scrape interval
+- Removed unnecessary components (Grafana, full Prometheus server)
+
+---
+
+### Observability Design Decisions
+
+- Minimal number of components
+- Predictable memory usage
+- Built-in visualization
+- Prometheus-compatible metrics
+
+This design prioritizes **stability over features**, which is critical for edge environments.
+
+---
+
+### If Given One More Week
+
+I would:
+- Add alerting for sustained CPU spikes
+- Simulate higher load patterns
+- Add automated stress testing for scrape reliability
+
+---
+
+## 5. How to Run
+
+Start all services using Docker Compose:
+
+    docker-compose up --build
+
+---
+
+## Access Points
+
+### Metrics Endpoint
+
+    http://localhost:8000/metrics
+
+This endpoint exposes Prometheus-compatible metrics from the sensor service.
+
+---
+
+### Visualization UI
+
+    http://localhost:8428/vmui
+
+The VictoriaMetrics VMUI is used to:
+
+- Query metrics using PromQL-compatible syntax  
+- Visualize request counters and latency trends  
+- Validate stability under continuous scraping  
+
+---
+
+## Final Note
+
+This solution focuses on doing only what is necessary to meet the assignment goals.
+
+The system is:
+
+- Simple  
+- Stable  
+- Resource-efficient  
+- Well-suited for edge environments with strict memory limits  
+
+All design decisions were made with predictable performance and low operational overhead in mind.
+
+
+## Video Walkthrough
+
+A short screen-recorded walkthrough explaining the architecture, optimizations,
+and observability design decisions is available here:
+
+https://drive.google.com/file/d/1ysytRzKApYtpH3t-JeNmDm7FQpitDnwp/view?usp=sharing
