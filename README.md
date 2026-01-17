@@ -1,8 +1,8 @@
-# DevOps Intern Assignment — Edge Observability Optimization
+# Hands-on DevOps project focused on observability under resource constraints
 
 ## 1. Context
 
-This assignment simulates working on an edge computing robot module with limited resources:
+This project simulates working on an edge computing robot module with limited resources:
 
 - 2-core CPU (~2 GHz)
 - ~500 MB usable RAM
@@ -216,7 +216,7 @@ The VictoriaMetrics VMUI is used to:
 
 ## Final Note
 
-This solution focuses on doing only what is necessary to meet the assignment goals.
+This solution focuses on doing only what is necessary to meet the project goals.
 
 The system is:
 
@@ -228,9 +228,3 @@ The system is:
 All design decisions were made with predictable performance and low operational overhead in mind.
 
 
-## Video Walkthrough
-
-A short screen-recorded walkthrough explaining the architecture, optimizations,
-and observability design decisions is available here:
-
-https://drive.google.com/file/d/1ysytRzKApYtpH3t-JeNmDm7FQpitDnwp/view?usp=sharing
